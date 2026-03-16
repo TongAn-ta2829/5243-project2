@@ -79,9 +79,4 @@ These visualizations allow users to explore distributions, relationships, and pa
 
 ---
 
-# How to Run the Application
 
-### 1. Install dependencies
-
-```bash
-pip install shiny pandas numpy scikit-learn openpyxl pyreadr
