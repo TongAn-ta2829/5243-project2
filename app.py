@@ -3,6 +3,7 @@ from shiny.render import DataGrid
 import pandas as pd
 
 from data_loading import load_builtin_dataset, read_uploaded_file
+from eda import register_eda_server
 
 from data_cleaning import (
     dataset_overview,
@@ -304,17 +305,28 @@ of each preprocessing choice.
 
     ui.p(
         """
-Feature engineering supports the creation or transformation of variables so that
-the dataset becomes more informative and better suited for analysis or predictive modeling.
-Examples include creating grouped variables, extracting information from dates,
-building ratios, and generating derived features from existing columns.
+Feature engineering supports the creation of new variables derived from the cleaned dataset.
+In this app, you can add feature steps one at a time and the app will keep a running “history”
+of the steps you’ve added.
 """
     ),
 
     ui.p(
         """
-This step is important because carefully designed features often improve both
-interpretability and model performance.
+Supported feature steps include:
+"""
+    ),
+
+    ui.tags.ul(
+        ui.tags.li("Datetime feature extraction: create year/month/day columns from a datetime column."),
+        ui.tags.li("Numeric binning: convert a numeric column into bins (categories)."),
+        ui.tags.li("Arithmetic features: add/subtract/multiply/divide two numeric columns into a new feature."),
+    ),
+
+    ui.p(
+        """
+Use “Add feature step” to append a step to the history (the log will show each step and any messages).
+If you make a mistake, you can remove a step by its step number and the engineered dataset will update.
 """
     ),
 
@@ -324,16 +336,23 @@ interpretability and model performance.
 
     ui.p(
         """
-Exploratory Data Analysis (EDA) helps users understand distributions, identify unusual
-patterns, and examine relationships among variables. Typical outputs in an EDA workflow
-include histograms, boxplots, scatterplots, bar charts, and summary statistics.
+Exploratory Data Analysis (EDA) helps you understand distributions, identify unusual patterns,
+and examine relationships among variables. In this tab you can choose which dataset to explore
+(raw, cleaned, or feature engineered), select a plot type, and then select appropriate columns.
 """
     ),
 
     ui.p(
         """
-EDA is useful for validating data quality, identifying trends, and guiding later
-modeling decisions.
+The tab also provides a summary table for the selected dataset (data type, missingness,
+unique values, and basic numeric/categorical summaries).
+"""
+    ),
+
+    ui.p(
+        """
+Note: plots require the optional Python package “matplotlib”. If it isn’t installed,
+the app will still show the summary table and will display instructions for enabling plots.
 """
     ),
 
@@ -359,6 +378,8 @@ modeling decisions.
         ui.tags.li("Inspect the dataset overview, column summary, and preview."),
         ui.tags.li("Go to Data Cleaning & Preprocessing and choose the desired preprocessing options."),
         ui.tags.li("Review the original preview, cleaning log, and cleaned preview."),
+        ui.tags.li("Optionally go to Feature Engineering to create derived features and review the feature log."),
+        ui.tags.li("Optionally go to Exploratory Data Analysis to visualize and summarize the dataset."),
         ui.tags.li("Download the cleaned dataset for further analysis or modeling."),
     ),
 
@@ -554,6 +575,46 @@ move efficiently from raw data to a cleaner and more analysis-ready dataset.
                 ui.output_text_verbatim("feature_warning"),
             ),
         ),
+        ui.nav_panel(
+            "4. Exploratory Data Analysis",
+            ui.layout_sidebar(
+                ui.sidebar(
+                    ui.input_select(
+                        "eda_source",
+                        "Dataset to explore",
+                        {
+                            "raw": "Raw (loaded)",
+                            "cleaned": "Cleaned",
+                            "featured": "Feature engineered",
+                        },
+                        selected="cleaned",
+                    ),
+                    ui.input_select(
+                        "eda_plot_type",
+                        "Plot type",
+                        {
+                            "hist": "Histogram (numeric)",
+                            "box": "Boxplot (numeric)",
+                            "scatter": "Scatter (numeric vs numeric)",
+                            "bar": "Bar chart (categorical counts)",
+                        },
+                        selected="hist",
+                    ),
+                    ui.output_ui("eda_col_ui"),
+                    ui.output_ui("eda_x_ui"),
+                    ui.output_ui("eda_y_ui"),
+                    ui.input_numeric("eda_bins", "Histogram bins", 20, min=2),
+                    ui.input_numeric("eda_top_n", "Top N categories (bar)", 20, min=1),
+                    ui.input_checkbox("eda_dropna", "Drop missing values for plot", True),
+                ),
+                ui.h3("EDA Plot"),
+                ui.output_text_verbatim("eda_plot_note"),
+                ui.output_plot("eda_plot"),
+                ui.hr(),
+                ui.h3("Summary (selected dataset)"),
+                ui.output_data_frame("eda_summary"),
+            ),
+        )
 
 
 
@@ -836,6 +897,15 @@ def server(input, output, session):
     def featured_data():
         data, _ = featured_result()
         return data
+
+    register_eda_server(
+        input,
+        output,
+        session,
+        raw_data=raw_data,
+        cleaned_data=cleaned_data,
+        featured_data=featured_data,
+    )
 
     @reactive.calc
     def feature_log_data():
