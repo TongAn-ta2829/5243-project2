@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import re
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.impute import KNNImputer
 
 
 def dataset_overview(df):
@@ -118,6 +119,7 @@ def handle_missing_values(df, numeric_method, categorical_method):
     num_cols = data.select_dtypes(include=np.number).columns
     cat_cols = data.select_dtypes(exclude=np.number).columns
 
+    # numeric
     if numeric_method == "mean":
         for col in num_cols:
             data[col] = data[col].fillna(data[col].mean())
@@ -129,7 +131,13 @@ def handle_missing_values(df, numeric_method, categorical_method):
     elif numeric_method == "zero":
         for col in num_cols:
             data[col] = data[col].fillna(0)
+    
+    elif numeric_method == "knn":
+        if len(num_cols) > 0:
+            imputer = KNNImputer(n_neighbors=5)
+            data[num_cols] = imputer.fit_transform(data[num_cols])
 
+    # categorical
     if categorical_method == "mode":
         for col in cat_cols:
             mode_vals = data[col].mode(dropna=True)

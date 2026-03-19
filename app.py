@@ -456,6 +456,7 @@ move efficiently from raw data to a cleaner and more analysis-ready dataset.
                             "mean": "Mean imputation",
                             "median": "Median imputation",
                             "zero": "Fill with 0",
+                            "knn": "KNN Imputation",
                         },
                     ),
 
@@ -630,16 +631,19 @@ def server(input, output, session):
     
     @reactive.calc
     def raw_data():
-        if input.upload() is not None:
+        uploaded = input.upload()
+
+        if uploaded is not None and len(uploaded) > 0:
             try:
-                return read_uploaded_file(input.upload())
-            except Exception:
+                return read_uploaded_file(uploaded)
+            except Exception as e:
+                print("Upload read error:", e)
                 return None
 
         if input.builtin() != "none":
             return load_builtin_dataset(input.builtin())
-
         return None
+
     
     feature_history = reactive.value([])
 
