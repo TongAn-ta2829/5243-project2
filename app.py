@@ -456,7 +456,7 @@ move efficiently from raw data to a cleaner and more analysis-ready dataset.
                             "mean": "Mean imputation",
                             "median": "Median imputation",
                             "zero": "Fill with 0",
-                            "knn": "KNN Imputation",
+                            "knn": "KNN Imputation with K=5",
                         },
                     ),
 
@@ -601,6 +601,13 @@ move efficiently from raw data to a cleaner and more analysis-ready dataset.
                         },
                         selected="hist",
                     ),
+
+                    ui.hr(),
+                    ui.h4("Filter"),
+                    ui.output_ui("eda_filter_col_ui"),
+                    ui.output_ui("eda_filter_value_ui"),
+                    ui.input_checkbox("eda_filter_dropna", "Exclude missing values in filter column", True),
+
                     ui.output_ui("eda_col_ui"),
                     ui.output_ui("eda_x_ui"),
                     ui.output_ui("eda_y_ui"),

@@ -1,6 +1,9 @@
 from __future__ import annotations
+from random import choices
 
+from htmltools.tags import col
 from shiny import ui, reactive, render
+from shiny.express import output
 from shiny.render import DataGrid
 import pandas as pd
 
@@ -204,3 +207,46 @@ def register_eda_server(input, output, session, *, raw_data, cleaned_data, featu
         ax.text(0.5, 0.5, "Unknown plot type.", ha="center", va="center")
         return fig
 
+    @output
+    @render.ui
+    def eda_filter_col_ui():
+        df = eda_data()
+        if df is None:
+            return ui.tags.div()
+
+        choices = ["None"] + df.columns.tolist()
+        return ui.input_select("eda_filter_col", "Filter column", choices=choices, selected="None")
+    
+    @output
+    @render.ui
+    def eda_filter_value_ui():
+        df = eda_data()
+        if df is None:
+            return ui.tags.div()
+
+        col = input.eda_filter_col()
+        if not col or col == "None" or col not in df.columns:
+            return ui.tags.div()
+
+        s = df[col]
+
+        if pd.api.types.is_numeric_dtype(s):
+            s_num = pd.to_numeric(s, errors="coerce").dropna()
+            if len(s_num) == 0:
+                return ui.tags.div("No numeric values available for filtering.")
+            return ui.TagList(
+                ui.input_numeric("eda_filter_min", f"{col} min", float(s_num.min())),
+                ui.input_numeric("eda_filter_max", f"{col} max", float(s_num.max())),
+            )
+
+        vals = sorted(s.dropna().astype(str).unique().tolist())
+        if len(vals) == 0:
+            return ui.tags.div("No category values available for filtering.")
+
+        return ui.input_selectize(
+            "eda_filter_levels",
+            f"{col} values",
+            choices=vals,
+            selected=vals[: min(5, len(vals))],
+            multiple=True,
+        )
