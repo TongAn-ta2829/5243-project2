@@ -44,7 +44,7 @@ Supported preprocessing operations include:
 - Removing duplicate rows
 - Handling missing values
 - Dropping rows with missing values
-- Filling missing values using mean or median
+- Filling missing values using mean, median or KNN
 - Scaling numerical variables (StandardScaler / MinMaxScaler)
 
 The cleaned dataset is updated automatically so that users can immediately observe the effect of the preprocessing steps.
