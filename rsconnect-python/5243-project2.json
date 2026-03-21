@@ -1,0 +1,12 @@
+{
+    "https://api.shinyapps.io": {
+        "server_url": "https://api.shinyapps.io",
+        "filename": "/Users/janicejoe/Documents/Columbia/spring_2026/Applied_Data_Science/5243-project2",
+        "app_url": "https://vjanjoe.shinyapps.io/5243-project2/",
+        "app_id": "16952080",
+        "app_guid": null,
+        "title": "5243-project2",
+        "app_mode": "python-shiny",
+        "app_store_version": 1
+    }
+}

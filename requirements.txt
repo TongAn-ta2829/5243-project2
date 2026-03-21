@@ -22,12 +22,16 @@ pandas==3.0.1
 pillow==12.1.1
 platformdirs==4.9.4
 prompt_toolkit==3.0.52
+PyJWT==2.12.1
 pyparsing==3.3.2
+pyreadr==0.5.4
 python-dateutil==2.9.0.post0
 python-multipart==0.0.22
 questionary==2.1.1
+rsconnect_python==1.28.2
 scikit-learn==1.8.0
 scipy==1.17.1
+semver==3.0.4
 setuptools==82.0.1
 shiny==1.5.1
 shinychat==0.2.9
@@ -41,4 +45,3 @@ watchfiles==1.1.1
 wcwidth==0.6.0
 websockets==16.0
 wheel==0.46.3
-pyreadr
